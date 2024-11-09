@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TapSwap Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .coin {
+            font-size: 100px;
+            cursor: pointer;
+        }
+        #leaderboard {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1>TapSwap Game</h1>
+    <div id="info"></div>
+    <div class="coin" onclick="clickCoin()">💰</div>
+    <div id="leaderboard">
+        <h3>Таблица лидеров</h3>
+        <ul id="leaderboardList"></ul>
+    </div>
+    <script>
+        const userId = new URLSearchParams(window.location.search).get('user_id');
+        if (!userId) {
+            document.getElementById('info').innerText = 'Ошибка: не указан user_id.';
+        } else {
+            fetch(/api/user/${userId})
+                .then(response => response.json())
+                .then(data => {
+                    if (data) {
+                        document.getElementById('info').innerText = Привет, ${data.username}! Ваш баланс: ${data.balance} монет.;
+                    }
+                })
+                .catch(err => console.error('Ошибка:', err));
+        }
+
+        function clickCoin() {
+            if (userId) {
+                fetch(/api/user/${userId}/click, { method: 'POST' })
+                    .then(response => response.json())
+                    .then(() => {
+                        fetch(/api/user/${userId})
+                            .then(response => response.json())
+                            .then(data => {
+                                document.getElementById('info').innerText = Привет, ${data.username}! Ваш баланс: ${data.balance} монет.;
+                            });
+                    })
+                    .catch(err => console.error('Ошибка:', err));
+            }
+        }
+
+        function loadLeaderboard() {
+            fetch('/api/leaderboard')
+                .then(response => response.json())
+                .then(data => {
+                    const leaderboardList = document.getElementById('leaderboardList');
+                    leaderboardList.innerHTML = '';
+                    data.forEach(user => {
+                        const li = document.createElement('li');
+                        li.textContent = ${user.username}: ${user.balance} монет;
+                        leaderboardList.appendChild(li);
+                    });
+                })
+                .catch(err => console.error('Ошибка:', err));
+        }
+
+        loadLeaderboard();
+        setInterval(loadLeaderboard, 10000); // Обновление таблицы лидеров каждые 10 секунд
+    </script>
+</body>
+</html>

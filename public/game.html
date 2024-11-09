@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TapSwap Game</title>
+    <style>
+        .coin {
+            width: 100px;
+            height: 100px;
+            background: gold;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 100px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        function clickCoin() {
+            const userId = new URLSearchParams(window.location.search).get('userId');
+            if (userId) {
+                fetch(/click?userId=${userId})
+                    .then(response => response.text())
+                    .then(data => {
+                        alert(data);
+                    })
+                    .catch(error => {
+                        alert('Ошибка при начислении монеток.');
+                    });
+            } else {
+                alert('User ID не найден.');
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Tap the Coin!</h1>
+    <div class="coin" onclick="clickCoin()">💰</div>
+</body>
+</html>
